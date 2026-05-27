@@ -11,13 +11,51 @@
       font-family: Arial, sans-serif;
       text-align: center;
     }
-    h1 {
-      margin-top: 40px;
-    }
-    video {
+    h1 { margin-top: 40px; }
+
+    .video-wrapper {
+      position: relative;
+      display: inline-block;
       margin-top: 20px;
+      cursor: pointer;
+    }
+    .video-wrapper video {
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      display: block;
+    }
+    .cover {
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      background: url('demo_cover.png') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s;
+    }
+    .cover:hover .play-btn { transform: scale(1.1); }
+    .play-btn {
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(4px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+      border: 3px solid rgba(255,255,255,0.7);
+    }
+    .play-btn::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-top: 18px solid transparent;
+      border-bottom: 18px solid transparent;
+      border-left: 30px solid white;
+      margin-left: 6px;
     }
   </style>
 </head>
@@ -25,16 +63,29 @@
 
   <h1>🎬 MatToolBench Demo</h1>
 
-  <video controls width="800">
-    <source src="https://github.com/meiwu5/MatToolBench/releases/download/v1.0/demo.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+  <div class="video-wrapper" id="wrapper">
+    <video controls width="800" id="vid">
+      <source src="demo.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <div class="cover" id="cover">
+      <div class="play-btn"></div>
+    </div>
+  </div>
 
   <p style="margin-top:20px;">
-    <a href="https://github.com/meiwu5/MatToolBench/releases/download/v1.0/demo.mp4" style="color:#38bdf8;">
-      ⬇ Download Video
-    </a>
+    <a href="demo.mp4" style="color:#38bdf8;">⬇ Download Video</a>
   </p>
+
+  <script>
+    const cover = document.getElementById('cover');
+    const vid = document.getElementById('vid');
+    cover.addEventListener('click', () => {
+      cover.style.opacity = '0';
+      cover.style.pointerEvents = 'none';
+      vid.play();
+    });
+  </script>
 
 </body>
 </html>
