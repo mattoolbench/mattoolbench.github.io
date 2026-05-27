@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaderboard — MatToolBench</title>
+  <meta name="description" content="MatToolBench model leaderboard: accuracy and efficiency rankings across GUI, Origin, and Code task categories." />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    :root {
+      --navy:#1a3a6e; --blue:#2060a8; --green:#2e8b48; --orange:#d07810;
+      --bg:#eef3fb; --card:#fff; --border:#d6e2f0; --text:#0d1b2e;
+      --muted:#536278; --na:#a0b8cc; --row-hover:#f0f5ff;
+      --shadow-sm:0 2px 10px rgba(26,58,110,.07);
+      --shadow-md:0 8px 32px rgba(26,58,110,.11);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+
+    /* ── Nav ── */
+    nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(26,58,110,.09);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:58px}
+    .nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+    .nav-logo img{height:32px;object-fit:contain;mix-blend-mode:multiply}
+    .nav-logo-text{font-size:1rem;font-weight:800;letter-spacing:-.025em;color:var(--navy)}
+    .t-mat{color:var(--blue)}.t-tool{color:var(--green)}.t-bench{color:var(--orange)}
+    .nav-links{display:flex;gap:4px;align-items:center}
+    .nav-links a{padding:5px 12px;border-radius:7px;font-size:.83rem;font-weight:600;color:var(--muted);text-decoration:none;transition:background .15s,color .15s}
+    .nav-links a:hover{background:rgba(26,58,110,.07);color:var(--navy)}
+    .nav-links a.active{color:var(--navy);background:rgba(26,58,110,.07);font-weight:700}
+    .nav-badge{padding:4px 11px;border-radius:20px;font-size:.72rem;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--green));color:#fff;letter-spacing:.04em}
+    .lang-btn{padding:5px 11px;border-radius:7px;font-size:.83rem;font-weight:700;color:var(--blue);border:1.5px solid var(--border);background:var(--card);cursor:pointer;transition:all .15s;margin-left:4px}
+    .lang-btn:hover{border-color:var(--blue);background:rgba(32,96,168,.06)}
+
+    /* ── Hero ── */
+    .hero{background:linear-gradient(135deg,#e8f0fb 0%,#ddeef7 45%,#e4f5ec 100%);padding:48px 24px 36px;text-align:center;border-bottom:1px solid var(--border)}
+    .hero-eyebrow{display:inline-block;margin-bottom:10px;font-size:.68rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);background:rgba(32,96,168,.09);padding:3px 12px;border-radius:20px}
+    .hero-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;letter-spacing:-.04em;line-height:1.15;margin-bottom:10px}
+    .hero-sub{font-size:.92rem;max-width:580px;margin:0 auto 18px;color:var(--muted);line-height:1.7}
+    .hero-chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .chip{padding:4px 14px;border-radius:20px;font-size:.74rem;font-weight:600;border:1.5px solid var(--border);background:var(--card);color:var(--muted);display:flex;align-items:center;gap:5px}
+
+    /* ── Main ── */
+    .main{max-width:1280px;margin:0 auto;padding:48px 20px 72px}
+
+    /* ── Tabs ── */
+    .tabs-wrapper{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-bottom:28px}
+    .tabs{display:flex;gap:5px;background:var(--bg);border-radius:12px;padding:5px;width:fit-content;border:1px solid var(--border)}
+    .tab-btn{padding:9px 24px;border:none;background:none;cursor:pointer;font-size:.9rem;font-weight:700;color:var(--muted);border-radius:8px;transition:background .15s,color .15s,box-shadow .15s}
+    .tab-btn.active{background:var(--card);color:var(--navy);box-shadow:var(--shadow-sm)}
+    .tab-btn:hover:not(.active){color:var(--text);background:rgba(255,255,255,.7)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .sub-tabs{display:flex;gap:4px;background:rgba(255,255,255,.75);border-radius:10px;padding:4px;width:fit-content;border:1px solid var(--border)}
+    .sub-tab-btn{padding:5px 18px;border:none;background:none;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--muted);border-radius:7px;transition:background .15s,color .15s}
+    .sub-tab-btn.active{background:var(--blue);color:#fff}
+    .sub-tab-btn:hover:not(.active){color:var(--text);background:rgba(255,255,255,.8)}
+
+    /* ── Section header ── */
+    .section-header{margin-bottom:16px}
+    .section-header h2{font-size:1.1rem;font-weight:800;color:var(--text)}
+    .section-header p{font-size:.86rem;color:var(--muted);margin-top:5px;line-height:1.6}
+
+    /* ── Legend ── */
+    .legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px;font-size:.8rem;align-items:center;color:var(--muted)}
+    .legend-item{display:flex;align-items:center;gap:7px}
+
+    /* ── Table ── */
+    .table-scroll{overflow-x:auto;border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+    table{width:100%;border-collapse:collapse;font-size:.78rem;background:var(--card)}
+    thead tr:first-child th{background:linear-gradient(180deg,#eef5ff 0%,#e4f0fb 100%);font-weight:800;padding:9px 8px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--border);color:var(--text);position:sticky;top:0;z-index:2}
+    thead tr:last-child th{background:#f4f9ff;font-weight:700;padding:7px 8px;white-space:nowrap;border-bottom:2px solid var(--border);color:var(--muted);font-size:.74rem;position:sticky;top:0;z-index:2}
+    tbody tr:hover{background:var(--row-hover)}
+    tbody td{padding:7px 8px;border-bottom:1px solid #edf2f9;text-align:center;white-space:nowrap}
+    tbody tr:last-child td{border-bottom:none}
+
+    /* model column */
+    .model-cell{font-weight:700;text-align:left!important;padding-left:10px!important;border-right:2px solid var(--border);color:var(--navy);white-space:nowrap;min-width:160px}
+    .rank-badge{display:inline-block;min-width:18px;font-size:.72rem;font-weight:800;color:#fff;background:rgba(26,58,110,.7);border-radius:3px;padding:1px 4px;margin-right:5px;text-align:center}
+
+    /* group headers */
+    th.model-group{border-left:2px solid var(--border);color:var(--navy)!important}
+    th.group-header{font-size:.85rem;font-weight:800;padding:10px 8px;border-bottom:1px solid var(--border)}
+    th.group-gui   {background:rgba(32,96,168,.1); color:var(--blue);  border-left:2px solid rgba(32,96,168,.3)}
+    th.group-origin{background:rgba(208,120,16,.1);color:var(--orange);border-left:2px solid rgba(208,120,16,.3)}
+    th.group-code  {background:rgba(46,139,72,.1); color:var(--green); border-left:2px solid rgba(46,139,72,.3)}
+    th.group-overall{background:rgba(192,57,43,.14);color:#b03020;border-right:3px solid rgba(192,57,43,.35)}
+
+    /* avg / overall columns */
+    th.avg-th  {background:rgba(26,58,110,.09); border-left:2px solid rgba(26,58,110,.2);font-style:italic}
+    th.overall-th{background:rgba(192,57,43,.12);border-right:3px solid rgba(192,57,43,.35)}
+    td.avg-col {background:rgba(26,58,110,.045);border-left:2px solid rgba(26,58,110,.12);font-weight:600}
+    td.overall-col{background:rgba(192,57,43,.06);border-right:3px solid rgba(192,57,43,.3);font-weight:700}
+    th.origin-col,td.origin-col{width:60px;min-width:60px;max-width:68px}
+    td.group-sep-l{border-left:2px solid var(--border)}
+
+    /* value highlights */
+    .val{font-variant-numeric:tabular-nums}
+    .val-best{color:#fff;font-weight:800;background:linear-gradient(135deg,#1e7e40,#27ae60);border-radius:5px;padding:2px 7px;box-shadow:0 1px 4px rgba(39,174,96,.35)}
+    .val-second{color:#1a6fb5;font-weight:700;border-bottom:2px solid #2980b9;padding-bottom:1px}
+    .val-best-overall{color:#fff;font-weight:800;background:linear-gradient(135deg,#c0392b,#e74c3c);border-radius:5px;padding:2px 7px;box-shadow:0 1px 4px rgba(192,57,43,.35)}
+    .val-second-overall{color:#c0392b;font-weight:700;border-bottom:2px solid #e74c3c;padding-bottom:1px}
+    .val-na{color:var(--na);font-style:italic}
+    .val-lo{color:#b45300;font-weight:700}
+
+    /* ── Notes ── */
+    .notes{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;box-shadow:var(--shadow-sm);font-size:.78rem;color:var(--muted);line-height:1.85;margin-top:32px}
+    .notes strong{color:var(--navy)}
+
+    /* ── Footer ── */
+    footer{border-top:1px solid var(--border);background:rgba(255,255,255,.6);text-align:center;padding:20px 24px;font-size:.76rem;color:var(--muted)}
+    footer a{color:var(--blue);text-decoration:none}
+    footer a:hover{text-decoration:underline}
+
+    /* ── i18n ── */
+    [data-lang-cn]{display:none}
+    body.zh [data-lang-en]{display:none}
+    body.zh [data-lang-cn]{display:revert}
+    p[data-lang-cn],div[data-lang-cn],h2[data-lang-cn],span[data-lang-cn]{display:none}
+    body.zh p[data-lang-cn],body.zh div[data-lang-cn],body.zh h2[data-lang-cn],body.zh span[data-lang-cn]{display:block}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <img src="logo.png" alt="MatToolBench" onerror="this.style.display='none'">
+    <span class="nav-logo-text"><span class="t-mat">Mat</span><span class="t-tool">Tool</span><span class="t-bench">Bench</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html"       data-lang-en>Home</a>
+    <a href="index.html"       data-lang-cn>主页</a>
+    <a href="leaderboard.html" class="active" data-lang-en>Leaderboard</a>
+    <a href="leaderboard.html" class="active" data-lang-cn>排行榜</a>
+    <a href="https://mattoolbench.github.io/demo.html" target="_blank" data-lang-en>Demo</a>
+    <a href="https://mattoolbench.github.io/demo.html" target="_blank" data-lang-cn>演示</a>
+    <a href="#" class="nav-badge" data-lang-en>Interactive Demo</a>
+    <a href="#" class="nav-badge" data-lang-cn>在线体验</a>
+    <a href="https://github.com/mattoolbench/MatToolBench" target="_blank">GitHub</a>
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">中文</button>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <h1 class="hero-title">
+    <span data-lang-en><span class="t-mat">Mat</span><span class="t-tool">Tool</span><span class="t-bench">Bench</span> Leaderboard</span>
+    <span data-lang-cn><span class="t-mat">Mat</span><span class="t-tool">Tool</span><span class="t-bench">Bench</span> 排行榜</span>
+  </h1>
+  <p class="hero-sub" data-lang-en>Model performance on 253 tasks across GUI interaction, script-based analysis, and programmatic database queries in professional materials science workflows.</p>
+  <p class="hero-sub" data-lang-cn>253 个任务的模型表现，涵盖 GUI 交互、脚本数据分析、数据库程序化查询三类材料科学专业工作流。</p>
+  <div class="hero-chips">
+    <span class="chip">📋 <span data-lang-en>253 Tasks</span><span data-lang-cn>253 个任务</span></span>
+    <span class="chip">🔬 <span data-lang-en>10 Domains</span><span data-lang-cn>10 个领域</span></span>
+    <span class="chip">🤖 <span data-lang-en>7 Models Evaluated</span><span data-lang-cn>7 个模型</span></span>
+  </div>
+</section>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <div class="tabs-wrapper">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('accuracy')" data-lang-en>Accuracy</button>
+      <button class="tab-btn active" onclick="switchTab('accuracy')" data-lang-cn>准确性</button>
+      <button class="tab-btn" onclick="switchTab('efficiency')" data-lang-en>Efficiency</button>
+      <button class="tab-btn" onclick="switchTab('efficiency')" data-lang-cn>效率</button>
+    </div>
+    <div class="sub-tabs" id="sub-acc">
+      <button class="sub-tab-btn active" onclick="switchAccSub('score')" data-lang-en>Score</button>
+      <button class="sub-tab-btn active" onclick="switchAccSub('score')" data-lang-cn>得分</button>
+      <button class="sub-tab-btn" onclick="switchAccSub('sr')" data-lang-en>SR (%)</button>
+      <button class="sub-tab-btn" onclick="switchAccSub('sr')" data-lang-cn>成功率 (%)</button>
+    </div>
+    <div class="sub-tabs" id="sub-eff" style="display:none">
+      <button class="sub-tab-btn active" onclick="switchEffSub('steps')" data-lang-en>Steps</button>
+      <button class="sub-tab-btn active" onclick="switchEffSub('steps')" data-lang-cn>步数</button>
+      <button class="sub-tab-btn" onclick="switchEffSub('stepsstar')" data-lang-en>Steps*</button>
+      <button class="sub-tab-btn" onclick="switchEffSub('stepsstar')" data-lang-cn>步数*</button>
+      <button class="sub-tab-btn" onclick="switchEffSub('ftr')" data-lang-en>FTR (%)</button>
+      <button class="sub-tab-btn" onclick="switchEffSub('ftr')" data-lang-cn>错误终止率 (%)</button>
+    </div>
+  </div>
+
+  <!-- ACCURACY -->
+  <div id="tab-accuracy" class="tab-panel active">
+    <div class="section-header">
+      <h2 data-lang-en>Accuracy Results</h2>
+      <h2 data-lang-cn>准确性结果</h2>
+      <p data-lang-en><strong>Score</strong>: normalized task score averaged over sub-criteria (0–100).&ensp;<strong>SR&thinsp;(%)</strong>: success rate — all sub-criteria satisfied.</p>
+      <p data-lang-cn><strong>Score</strong>：子标准归一化平均得分（0–100）。&ensp;<strong>SR&thinsp;(%)</strong>：成功率（所有子标准均满足）。</p>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="val val-best"         style="font-size:.76rem;padding:1px 6px">99</span>&ensp;<span data-lang-en>Best per domain</span><span data-lang-cn>领域最优</span></div>
+      <div class="legend-item"><span class="val val-second"       style="font-size:.76rem">99</span>&ensp;<span data-lang-en>2nd per domain</span><span data-lang-cn>领域次优</span></div>
+      <div class="legend-item"><span class="val val-best-overall" style="font-size:.76rem;padding:1px 6px">99</span>&ensp;<span data-lang-en>Best overall</span><span data-lang-cn>总体最优</span></div>
+      <div class="legend-item"><span class="val val-second-overall" style="font-size:.76rem">99</span>&ensp;<span data-lang-en>2nd overall</span><span data-lang-cn>总体次优</span></div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" style="text-align:left;min-width:160px" data-lang-en>Model</th>
+            <th rowspan="2" style="text-align:left;min-width:160px" data-lang-cn>模型</th>
+            <th colspan="1" class="group-header group-overall" data-lang-en>Overall</th>
+            <th colspan="1" class="group-header group-overall" data-lang-cn>总平均</th>
+            <th colspan="6" class="group-header group-gui"    style="border-left:2px solid rgba(32,96,168,.3)">GUI Agent</th>
+            <th colspan="1" class="group-header group-origin" style="border-left:2px solid rgba(208,120,16,.3)">Origin Agent</th>
+            <th colspan="5" class="group-header group-code"   style="border-left:2px solid rgba(46,139,72,.3)">Code Agent</th>
+          </tr>
+          <tr>
+            <th class="avg-th overall-th" data-lang-en>Avg</th>
+            <th class="avg-th overall-th" data-lang-cn>均值</th>
+            <th class="group-sep-l">Avantage</th><th>JADE</th><th>DM</th><th>MS</th><th>VESTA</th><th class="avg-th">Avg</th>
+            <th class="group-sep-l avg-th origin-col">Origin</th>
+            <th class="group-sep-l">Pymatgen</th><th>MP</th><th>OQMD</th><th>OPTIMADE</th><th class="avg-th">Avg</th>
+          </tr>
+        </thead>
+        <tbody id="acc-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EFFICIENCY -->
+  <div id="tab-efficiency" class="tab-panel">
+    <div class="section-header">
+      <h2 data-lang-en>Efficiency Results</h2>
+      <h2 data-lang-cn>效率结果</h2>
+      <p data-lang-en><strong>Steps</strong>: mean steps across all episodes (max 50, lower = better).&ensp;<strong>Steps*</strong>: mean steps on successful episodes only.&ensp;<strong>FTR&thinsp;(%)</strong>: false termination rate (lower = better).</p>
+      <p data-lang-cn><strong>步数</strong>：所有回合平均步数（满分50步，越少越高效）。&ensp;<strong>步数*</strong>：仅成功回合平均步数。&ensp;<strong>FTR</strong>：错误终止率（越低越好）。</p>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><span class="val val-best"   style="font-size:.76rem;padding:1px 6px">9.9</span>&ensp;<span data-lang-en>Best (lowest) per domain</span><span data-lang-cn>领域最优（最低）</span></div>
+      <div class="legend-item"><span class="val val-second" style="font-size:.76rem">9.9</span>&ensp;<span data-lang-en>2nd best per domain</span><span data-lang-cn>领域次优</span></div>
+      <div class="legend-item"><span style="color:var(--na);font-style:italic">N/A</span>&ensp;<span data-lang-en>No successful episodes (Steps*) / no early terminations (FTR)</span><span data-lang-cn>无成功回合（步数*）/ 无提前终止（FTR）</span></div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" style="text-align:left;min-width:160px" data-lang-en>Model</th>
+            <th rowspan="2" style="text-align:left;min-width:160px" data-lang-cn>模型</th>
+            <th colspan="1" class="group-header group-overall" data-lang-en>Overall</th>
+            <th colspan="1" class="group-header group-overall" data-lang-cn>总平均</th>
+            <th colspan="6" class="group-header group-gui"    style="border-left:2px solid rgba(32,96,168,.3)">GUI Agent</th>
+            <th colspan="1" class="group-header group-origin" style="border-left:2px solid rgba(208,120,16,.3)">Origin Agent</th>
+            <th colspan="5" class="group-header group-code"   style="border-left:2px solid rgba(46,139,72,.3)">Code Agent</th>
+          </tr>
+          <tr>
+            <th class="avg-th overall-th" data-lang-en>Avg</th>
+            <th class="avg-th overall-th" data-lang-cn>均值</th>
+            <th class="group-sep-l">Avantage</th><th>JADE</th><th>DM</th><th>MS</th><th>VESTA</th><th class="avg-th">Avg</th>
+            <th class="group-sep-l avg-th origin-col">Origin</th>
+            <th class="group-sep-l">Pymatgen</th><th>MP</th><th>OQMD</th><th>OPTIMADE</th><th class="avg-th">Avg</th>
+          </tr>
+        </thead>
+        <tbody id="eff-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="notes">
+    <strong data-lang-en>Scoring notes</strong><strong data-lang-cn>评分说明</strong><br>
+    <span data-lang-en>
+      <strong>Score</strong> = normalized task score (0–100) averaged across all tasks in the domain.&ensp;
+      <strong>SR</strong> = success rate: fraction of tasks where all sub-criteria are satisfied.&ensp;
+      GUI and Origin tasks use vision-based evaluation; Code tasks use exact key-value matching (MP, OQMD) or file-existence checks (OPTIMADE, Pymatgen).&ensp;
+      OPTIMADE uses <em>score_by_attempts</em>: (max_steps − first_success_step + 1) / max_steps.&ensp;
+      <strong>Steps*</strong> = mean steps on successful episodes only.&ensp;
+      <strong>FTR</strong> = false termination rate (agent ends without completing the task).
+    </span>
+    <span data-lang-cn>
+      <strong>Score</strong> = 任务归一化得分（0–100），取该领域所有任务的平均值。&emsp;
+      <strong>SR</strong> = 成功率：所有子评判标准均满足的任务比例。&emsp;
+      GUI 和 Origin 任务采用基于视觉的评测；Code 任务使用精确键值匹配（MP、OQMD）或文件存在性检查（OPTIMADE、Pymatgen）。&emsp;
+      OPTIMADE 采用 <em>score_by_attempts</em>：(max_steps − 首次成功步骤 + 1) / max_steps。&emsp;
+      <strong>步数*</strong> = 仅成功回合的平均步数。&emsp;
+      <strong>FTR</strong> = 错误终止率（智能体未完成任务即终止）。
+    </span>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    <a href="index.html">MatToolBench</a> ·
+    <a href="leaderboard.html" data-lang-en>Leaderboard</a><a href="leaderboard.html" data-lang-cn>排行榜</a> ·
+    <a href="https://github.com/mattoolbench/MatToolBench" target="_blank">GitHub</a> ·
+    <span data-lang-en>Materials Science Agent Benchmark · MIT License</span>
+    <span data-lang-cn>材料科学智能体基准 · MIT 开源协议</span>
+  </p>
+</footer>
+
+<script>
+/* ── i18n ── */
+let lang = localStorage.getItem('mtb_lb_lang') || 'en';
+function applyLang() {
+  if (lang === 'zh') document.body.classList.add('zh');
+  else               document.body.classList.remove('zh');
+  document.getElementById('langBtn').textContent = lang === 'en' ? '中文' : 'English';
+  localStorage.setItem('mtb_lb_lang', lang);
+}
+function toggleLang() { lang = lang === 'en' ? 'zh' : 'en'; applyLang(); }
+applyLang();
+
+/* ── Tab state ── */
+let currentTab    = 'accuracy';
+let currentAccSub = 'score';
+let currentEffSub = 'steps';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('sub-acc').style.display = tab === 'accuracy'  ? '' : 'none';
+  document.getElementById('sub-eff').style.display = tab === 'efficiency' ? '' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i < 2) ? tab === 'accuracy' : tab === 'efficiency');
+  });
+}
+function switchAccSub(sub) {
+  currentAccSub = sub;
+  document.querySelectorAll('#sub-acc .sub-tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i < 2) ? sub === 'score' : sub === 'sr');
+  });
+  renderAcc(sub);
+}
+function switchEffSub(sub) {
+  currentEffSub = sub;
+  const order = ['steps','stepsstar','ftr'];
+  document.querySelectorAll('#sub-eff .sub-tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', order[Math.floor(i/2)] === sub);
+  });
+  renderEff(sub);
+}
+
+/* ── Data ──
+   Model order (ranked by Overall Score, descending):
+   0: GPT-5.4        51.5
+   1: Claude-4.6     48.5
+   2: Doubao seed-1-8 42.5
+   3: Kimi k2.5      42.0
+   4: Qwen3-VL 235B  33.7
+   5: Qwen3-VL 32B   21.2
+   6: Qwen3-VL 8B    19.9
+*/
+const MODELS = [
+  'GPT-5.4','Claude-sonnet-4.6','Doubao-seed-1-8','Kimi-k2.5',
+  'Qwen3-VL-235B','Qwen3-VL-32B','Qwen3-VL-8B'
+];
+
+/* ACC_DATA: values[mi] = [score, sr%] */
+const ACC_DATA = [
+  { tools:'GUI',    domain_en:'Avantage', domain_cn:'Avantage',
+    values:[[32.3,15.0],[41.3,35.0],[44.6,35.0],[32.3,20.0],[30.8,10.0],[26.2,15.0],[18.5,15.0]] },
+  { tools:'GUI',    domain_en:'JADE',     domain_cn:'JADE',
+    values:[[50.8,20.0],[57.6,25.0],[54.2,25.0],[50.8,25.0],[45.8,10.0],[37.3,10.0],[37.3,5.0]] },
+  { tools:'GUI',    domain_en:'DM',       domain_cn:'DM',
+    values:[[50.7,20.0],[40.3,20.0],[56.7,20.0],[52.2,20.0],[52.2,10.0],[6.0,0.0],[38.8,10.0]] },
+  { tools:'GUI',    domain_en:'MS',       domain_cn:'MS',
+    values:[[56.1,30.0],[52.4,20.0],[47.6,15.0],[35.4,10.0],[43.9,0.0],[26.8,0.0],[20.7,0.0]] },
+  { tools:'GUI',    domain_en:'VESTA',    domain_cn:'VESTA',
+    values:[[65.2,20.0],[58.0,25.0],[52.2,20.0],[59.4,25.0],[52.2,10.0],[29.0,10.0],[30.4,10.0]] },
+  { tools:'GUI',    domain_en:'Avg.',     domain_cn:'平均',  isAvg:true,
+    values:[[51.0,21.0],[49.9,25.0],[52.1,24.0],[46.0,20.0],[45.0,8.0],[25.1,7.0],[29.1,8.0]] },
+  { tools:'Origin', domain_en:'Origin',   domain_cn:'Origin', isAvg:true,
+    values:[[63.8,68.8],[53.1,56.3],[11.7,12.5],[22.5,25.0],[6.3,6.3],[5.3,6.3],[0.0,0.0]] },
+  { tools:'Code',   domain_en:'Pymatgen', domain_cn:'Pymatgen',
+    values:[[35.0,35.0],[25.0,25.0],[30.0,30.0],[15.0,15.0],[35.0,35.0],[29.4,29.4],[15.0,15.0]] },
+  { tools:'Code',   domain_en:'MP',       domain_cn:'MP',
+    values:[[17.5,15.0],[21.9,15.0],[25.0,25.0],[22.5,20.0],[25.0,25.0],[10.0,10.0],[10.0,10.0]] },
+  { tools:'Code',   domain_en:'OQMD',     domain_cn:'OQMD',
+    values:[[58.2,45.0],[60.8,50.0],[33.2,10.0],[50.3,30.0],[26.2,10.0],[11.5,0.0],[18.4,0.0]] },
+  { tools:'Code',   domain_en:'OPTIMADE', domain_cn:'OPTIMADE',
+    values:[[85.0,85.0],[75.0,75.0],[70.0,70.0],[80.0,80.0],[20.0,20.0],[30.0,30.0],[10.0,10.0]] },
+  { tools:'Code',   domain_en:'Avg.',     domain_cn:'平均',  isAvg:true,
+    values:[[48.9,45.0],[45.7,41.3],[39.6,33.8],[42.0,36.2],[26.6,22.5],[20.2,17.4],[13.4,8.8]] },
+  { isOverall:true, domain_en:'Overall Avg.', domain_cn:'总平均',
+    values:[[51.5,35.4],[48.5,34.6],[42.5,26.3],[42.0,27.0],[33.7,13.6],[21.2,11.1],[19.9,7.5]] },
+];
+
+/* EFF_DATA: values[mi] = [steps, steps*, ftr%]  lower = better */
+const EFF_DATA = [
+  { tools:'GUI',    domain_en:'Avantage', domain_cn:'Avantage',
+    values:[[39.2,7.8,50.0],[41.1,26.1,25.0],[36.1,19.9,25.0],[42.4,36.0,60.0],[39.7,8.0,71.4],[46.2,31.7,60.0],[44.9,42.4,66.7]] },
+  { tools:'GUI',    domain_en:'JADE',     domain_cn:'JADE',
+    values:[[29.0,8.7,85.7],[35.9,15.2,44.4],[34.6,24.2,50.0],[35.3,15.6,44.4],[41.8,19.5,71.4],[42.9,5.1,85.7],[48.7,41.4,0.0]] },
+  { tools:'GUI',    domain_en:'DM',       domain_cn:'DM',
+    values:[[39.3,27.3,57.1],[45.4,28.6,0.0],[38.3,27.6,42.9],[42.9,30.8,40.0],[38.1,18.5,77.8],[50.0,NaN,NaN],[50.0,50.0,NaN]] },
+  { tools:'GUI',    domain_en:'MS',       domain_cn:'MS',
+    values:[[41.6,34.9,37.5],[45.1,42.1,50.0],[47.6,42.0,50.0],[48.8,39.0,50.0],[50.0,NaN,100.0],[50.0,NaN,NaN],[50.0,NaN,NaN]] },
+  { tools:'GUI',    domain_en:'VESTA',    domain_cn:'VESTA',
+    values:[[30.3,40.8,83.3],[41.1,36.6,57.1],[39.1,22.3,50.0],[41.1,36.6,57.1],[33.5,10.5,75.0],[44.1,13.3,33.3],[50.0,50.0,NaN]] },
+  { tools:'GUI',    domain_en:'Avg.',     domain_cn:'平均',  isAvg:true,
+    values:[[35.9,23.9,62.7],[41.7,29.7,35.3],[39.1,27.2,43.6],[42.1,31.6,50.3],[40.6,14.1,79.1],[46.7,16.7,59.7],[48.7,NaN,NaN]] },
+  { tools:'Origin', domain_en:'Origin',   domain_cn:'Origin', isAvg:true,
+    values:[[34.3,23.5,60.0],[32.7,33.7,83.3],[47.7,NaN,100.0],[47.2,31.7,50.0],[48.0,24.5,50.0],[48.6,50.0,100.0],[50.0,NaN,NaN]] },
+  { tools:'Code',   domain_en:'Pymatgen', domain_cn:'Pymatgen',
+    values:[[4.9,2.0,63.2],[2.2,2.0,75.0],[2.0,2.0,70.0],[13.5,2.0,80.0],[2.0,2.0,65.0],[10.7,3.0,68.8],[13.5,2.0,81.3]] },
+  { tools:'Code',   domain_en:'MP',       domain_cn:'MP',
+    values:[[2.0,2.0,100.0],[2.0,2.0,85.0],[2.0,2.0,75.0],[2.0,2.0,80.0],[2.3,2.0,75.0],[3.4,3.0,90.0],[2.0,2.0,90.0]] },
+  { tools:'Code',   domain_en:'OQMD',     domain_cn:'OQMD',
+    values:[[2.0,2.0,55.0],[2.0,2.0,50.0],[2.0,2.0,90.0],[2.0,2.0,20.0],[2.0,2.0,90.0],[3.1,NaN,100.0],[2.0,NaN,100.0]] },
+  { tools:'Code',   domain_en:'OPTIMADE', domain_cn:'OPTIMADE',
+    values:[[2.0,2.0,15.0],[2.0,2.0,25.0],[2.0,2.0,30.0],[2.0,2.0,20.0],[2.0,2.0,80.0],[3.0,3.0,70.0],[2.0,2.0,90.0]] },
+  { tools:'Code',   domain_en:'Avg.',     domain_cn:'平均',  isAvg:true,
+    values:[[2.7,2.0,58.3],[2.1,2.0,58.8],[2.0,2.0,66.3],[4.9,2.0,50.0],[2.1,2.0,77.5],[5.1,3.0,82.2],[4.9,2.0,90.3]] },
+  { isOverall:true, domain_en:'Overall Avg.', domain_cn:'总平均',
+    values:[[24.3,16.5,60.3],[25.5,21.8,59.1],[29.6,14.6,70.0],[31.4,21.8,50.1],[30.2,13.5,68.9],[33.5,23.2,80.6],[34.5,NaN,NaN]] },
+];
+
+/* ── Rank helpers ── */
+function rankTop2(vals) {
+  const valid = vals.map((v,i)=>({v,i})).filter(x => x.v !== null && !isNaN(x.v));
+  valid.sort((a,b) => b.v - a.v);
+  return { best: valid[0]?.i, second: valid[1]?.i };
+}
+function rankTop2Low(vals) {
+  const valid = vals.map((v,i)=>({v,i})).filter(x => x.v !== null && !isNaN(x.v));
+  valid.sort((a,b) => a.v - b.v);
+  return { best: valid[0]?.i, second: valid[1]?.i };
+}
+
+/* ── Render Accuracy ── */
+function renderAcc(metric = 'score') {
+  const primaryIdx = metric === 'score' ? 0 : 1;
+  const guiRows    = ACC_DATA.filter(r => r.tools === 'GUI');
+  const originRows = ACC_DATA.filter(r => r.tools === 'Origin');
+  const codeRows   = ACC_DATA.filter(r => r.tools === 'Code');
+  const overallRow = ACC_DATA.find(r => r.isOverall);
+  const allDomains = [...guiRows, ...originRows, ...codeRows];
+
+  const colRanks = allDomains.map(d => rankTop2(d.values.map(v => v[primaryIdx])));
+  const ovRank   = rankTop2(overallRow.values.map(v => v[primaryIdx]));
+
+  const originStart = guiRows.length;
+  const codeStart   = guiRows.length + originRows.length;
+
+  function scoreCell(score, rankObj, mi, isAvg, sepLeft, extraCls = '', isOv = false) {
+    let tdCls = (isAvg ? ' avg-col' : '') + (sepLeft ? ' group-sep-l' : '') + (extraCls ? ' ' + extraCls : '');
+    if (score === null || score === undefined) return `<td class="${tdCls}"><span class="val-na">—</span></td>`;
+    let valCls = 'val';
+    if (rankObj?.best   === mi) valCls += isOv ? ' val-best-overall'  : ' val-best';
+    else if (rankObj?.second === mi) valCls += isOv ? ' val-second-overall' : ' val-second';
+    return `<td class="${tdCls}"><span class="${valCls}">${score.toFixed(1)}</span></td>`;
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+  let html = '';
+  MODELS.forEach((model, mi) => {
+    const medal = mi < 3 ? `<span style="margin-right:3px">${medals[mi]}</span>` : '';
+    html += `<tr><td class="model-cell"><span class="rank-badge">${mi+1}</span>${medal}${model}</td>`;
+    // Overall first
+    const ov = overallRow.values[mi][primaryIdx];
+    let ovCls = 'val';
+    if (ovRank?.best === mi) ovCls += ' val-best-overall';
+    else if (ovRank?.second === mi) ovCls += ' val-second-overall';
+    html += `<td class="avg-col overall-col"><span class="${ovCls}">${ov.toFixed(1)}</span></td>`;
+    // Domain columns
+    allDomains.forEach((domain, di) => {
+      const primary = domain.values[mi][primaryIdx];
+      const sepLeft = (di === originStart || di === codeStart || di === 0);
+      const extra   = (di >= originStart && di < codeStart) ? 'origin-col' : '';
+      html += scoreCell(primary, colRanks[di], mi, domain.isAvg, sepLeft, extra);
+    });
+    html += '</tr>';
+  });
+  document.getElementById('acc-body').innerHTML = html;
+}
+
+/* ── Render Efficiency ── */
+function renderEff(metric = 'steps') {
+  const metricIdx = { steps:0, stepsstar:1, ftr:2 }[metric];
+  const guiRows    = EFF_DATA.filter(r => r.tools === 'GUI');
+  const originRows = EFF_DATA.filter(r => r.tools === 'Origin');
+  const codeRows   = EFF_DATA.filter(r => r.tools === 'Code');
+  const overallRow = EFF_DATA.find(r => r.isOverall);
+  const allDomains = [...guiRows, ...originRows, ...codeRows];
+
+  const colRanks = allDomains.map(d => rankTop2Low(d.values.map(v => v[metricIdx])));
+  const ovRank   = rankTop2Low(overallRow.values.map(v => {
+    const val = v[metricIdx];
+    return (val === null || val === undefined || isNaN(val)) ? null : val;
+  }));
+
+  const originStart = guiRows.length;
+  const codeStart   = guiRows.length + originRows.length;
+
+  function effCell(primary, rankObj, mi, isAvg, sepLeft, extraCls = '', isOv = false) {
+    let tdCls = (isAvg ? ' avg-col' : '') + (sepLeft ? ' group-sep-l' : '') + (extraCls ? ' ' + extraCls : '');
+    if (primary === null || primary === undefined) return `<td class="${tdCls}"><span class="val-na">—</span></td>`;
+    if (isNaN(primary)) return `<td class="${tdCls}"><span class="val-na" style="font-style:normal;font-size:.74rem">N/A</span></td>`;
+    let valCls = 'val';
+    if (rankObj?.best   === mi) valCls += isOv ? ' val-best-overall'  : ' val-best';
+    else if (rankObj?.second === mi) valCls += isOv ? ' val-second-overall' : ' val-second';
+    return `<td class="${tdCls}"><span class="${valCls}">${primary.toFixed(1)}</span></td>`;
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+  let html = '';
+  MODELS.forEach((model, mi) => {
+    const medal = mi < 3 ? `<span style="margin-right:3px">${medals[mi]}</span>` : '';
+    html += `<tr><td class="model-cell"><span class="rank-badge">${mi+1}</span>${medal}${model}</td>`;
+    // Overall first
+    const ov = overallRow.values[mi][metricIdx];
+    let ovTdCls = ' avg-col overall-col';
+    let ovValCls = 'val';
+    if (!isNaN(ov) && ov !== null) {
+      if (ovRank?.best   === mi) ovValCls += ' val-best-overall';
+      else if (ovRank?.second === mi) ovValCls += ' val-second-overall';
+    }
+    const ovDisp = (ov === null || ov === undefined) ? `<span class="val-na">—</span>`
+                 : isNaN(ov) ? `<span class="val-na" style="font-style:normal;font-size:.74rem">N/A</span>`
+                 : `<span class="${ovValCls}">${ov.toFixed(1)}</span>`;
+    html += `<td class="${ovTdCls}">${ovDisp}</td>`;
+    // Domain columns
+    allDomains.forEach((domain, di) => {
+      const primary = domain.values[mi][metricIdx];
+      const sepLeft = (di === originStart || di === codeStart || di === 0);
+      const extra   = (di >= originStart && di < codeStart) ? 'origin-col' : '';
+      html += effCell(primary, colRanks[di], mi, domain.isAvg, sepLeft, extra);
+    });
+    html += '</tr>';
+  });
+  document.getElementById('eff-body').innerHTML = html;
+}
+
+renderAcc('score');
+renderEff('steps');
+</script>
+</body>
+</html>
